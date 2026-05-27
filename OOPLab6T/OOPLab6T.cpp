@@ -243,11 +243,10 @@ void task2() {
     std::vector<Worker*> workers;
     int n;
     std::cout << "Скільки працівників ввести? "; std::cin >> n;
-    clearInput();
 
     for (int i = 0; i < n; i++) {
         std::cout << "\nПрацівник " << (i + 1) << ". Тип (1-погодинний, 2-штатний, 3-відсотковий): ";
-        int type; std::cin >> type; clearInput();
+        int type; std::cin >> type;
         std::string name;
         std::cout << "  Ім'я (без пробілів): "; std::cin >> name;
         int hours; std::cout << "  Кількість годин: "; std::cin >> hours;
