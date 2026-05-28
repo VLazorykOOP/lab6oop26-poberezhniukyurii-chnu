@@ -1,338 +1,146 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <limits>
-#include <windows.h>
-// Завдання 1 – дві ієрархії (без та з virtual)
-class A {
-protected: int a;
-public:
-    A() : a(0) { std::cout << "[A] конструктор\n"; }
-    A(int x) : a(x) { std::cout << "[A] конструктор(" << x << ")\n"; }
-    ~A() { std::cout << "[A] деструктор\n"; }
-};
-class B : public A {
-protected: int b;
-public:
-    B() : b(0) { std::cout << "[B] конструктор\n"; }
-    B(int x, int y) : A(x), b(y) { std::cout << "[B] конструктор\n"; }
-    ~B() { std::cout << "[B] деструктор\n"; }
-};
-class C : public A {
-protected: double c;
-public:
-    C() : c(0) { std::cout << "[C] конструктор\n"; }
-    C(int x, double y) : A(x), c(y) { std::cout << "[C] конструктор\n"; }
-    ~C() { std::cout << "[C] деструктор\n"; }
-};
-class D : public B, public C {
-protected: double d;
-public:
-    D() : d(0) { std::cout << "[D] конструктор\n"; }
-    D(int ab, int bb, int ac, double cc, double dd)
-        : B(ab, bb), C(ac, cc), d(dd) {
-        std::cout << "[D] конструктор\n";
-    }
-    ~D() { std::cout << "[D] деструктор\n"; }
-    void show() {
-        std::cout << "B::A::a=" << B::a << " C::A::a=" << C::a
-            << " b=" << b << " c=" << c << " d=" << d << "\n";
+using namespace std;
+
+
+struct A { int a; A(int x=0):a(x){} };
+struct B : A { int b; B(int x=0,int y=0):A(x),b(y){} };
+struct C : A { double c; C(int x=0,double y=0):A(x),c(y){} };
+struct D : C { double d; D(int ac=0,double cc=0,double dd=0):C(ac,cc),d(dd){} };
+struct E : B { double e; E(int ab=0,int bb=0,double ee=0):B(ab,bb),e(ee){} };
+struct F : D, E {
+    double f;
+    F(int dac,double dc,double dd,int eab,int eb,double ee,double ff)
+        :D(dac,dc,dd),E(eab,eb,ee),f(ff){}
+    void show(){
+        cout << "D::C::A::a=" << D::C::a
+             << " E::B::A::a=" << E::B::a
+             << " D::d=" << D::d
+             << " E::e=" << E::e
+             << " f=" << f << "\n";
     }
 };
 
-class AV {
-protected: int a;
-public:
-    AV() : a(0) { std::cout << "[AV] конструктор\n"; }
-    AV(int x) : a(x) { std::cout << "[AV] конструктор(" << x << ")\n"; }
-    ~AV() { std::cout << "[AV] деструктор\n"; }
-};
-class BV : virtual public AV {
-protected: int b;
-public:
-    BV() : b(0) { std::cout << "[BV] конструктор\n"; }
-    BV(int x, int y) : AV(x), b(y) { std::cout << "[BV] конструктор\n"; }
-    ~BV() { std::cout << "[BV] деструктор\n"; }
-};
-class CV : virtual public AV {
-protected: double c;
-public:
-    CV() : c(0) { std::cout << "[CV] конструктор\n"; }
-    CV(int x, double y) : AV(x), c(y) { std::cout << "[CV] конструктор\n"; }
-    ~CV() { std::cout << "[CV] деструктор\n"; }
-};
-class DV : public BV, public CV {
-protected: double d;
-public:
-    DV() : d(0) { std::cout << "[DV] конструктор\n"; }
-    DV(int av, int bv, int acv, double ccv, double dv)
-        : AV(av), BV(av, bv), CV(acv, ccv), d(dv) {
-        std::cout << "[DV] конструктор\n";
-    }
-    ~DV() { std::cout << "[DV] деструктор\n"; }
-    void show() {
-        std::cout << "a=" << a << " b=" << b << " c=" << c << " d=" << d << "\n";
-    }
-};
-// Завдання 2 – абстрактний клас Worker та похідні
-class Worker {
-protected:
-    std::string name;
-    int hoursWorked;
-public:
-    Worker() : name("Невідомо"), hoursWorked(0) {}
-    Worker(const std::string& n, int h) : name(n), hoursWorked(h) {
-        std::cout << "[Worker] конструктор: " << name << "\n";
-    }
-    Worker(const Worker& w) : name(w.name), hoursWorked(w.hoursWorked) {
-        std::cout << "[Worker] конструктор копії\n";
-    }
-    virtual ~Worker() { std::cout << "[Worker] деструктор: " << name << "\n"; }
-    virtual double salary() const = 0;
-    virtual void print() const {
-        std::cout << "Ім'я: " << name << ", Годин: " << hoursWorked;
+struct AV { int a; AV(int x=0):a(x){} };
+struct BV : virtual AV { int b; BV(int x=0,int y=0):AV(x),b(y){} };
+struct CV : virtual AV { double c; CV(int x=0,double y=0):AV(x),c(y){} };
+struct DV : CV { double d; DV(int ac=0,double cc=0,double dd=0):CV(ac,cc),d(dd){} };
+struct EV : BV { double e; EV(int ab=0,int bb=0,double ee=0):BV(ab,bb),e(ee){} };
+struct FV : DV, EV {
+    double f;
+    FV(int av,int dac,double dc,double dd,int eab,int eb,double ee,double ff)
+        :AV(av),DV(dac,dc,dd),EV(eab,eb,ee),f(ff){}
+    void show(){
+        cout << "a=" << a
+             << " b=" << b << " c=" << c
+             << " DV::d=" << DV::d
+             << " EV::e=" << EV::e
+             << " f=" << f << "\n";
     }
 };
 
-class HourlyWorker : public Worker {
-    double hourlyRate;
-public:
-    HourlyWorker() : hourlyRate(0) {}
-    HourlyWorker(const std::string& n, int h, double r)
-        : Worker(n, h), hourlyRate(r) {
-        std::cout << "[HourlyWorker] конструктор\n";
-    }
-    HourlyWorker(const HourlyWorker& o) : Worker(o), hourlyRate(o.hourlyRate) {}
-    ~HourlyWorker() { std::cout << "[HourlyWorker] деструктор\n"; }
-    double salary() const override { return hoursWorked * hourlyRate; }
-    void print() const override {
-        Worker::print();
-        std::cout << ", Ставка/год: " << hourlyRate << ", Зарплата: " << salary() << "\n";
-    }
-};
+void task1(){
+    cout << "\n=== Завдання 1: ієрархія БЕЗ virtual ===\n";
+    int dac,eab,eb; double dc,dd,ee,ff;
+    cout << "D (a_C c d): "; cin>>dac>>dc>>dd;
+    cout << "E (a_B b e): "; cin>>eab>>eb>>ee;
+    cout << "f: "; cin>>ff;
+    F obj(dac,dc,dd,eab,eb,ee,ff);
+    obj.show();
+    cout << "sizeof: A="<<sizeof(A)<<" B="<<sizeof(B)<<" C="<<sizeof(C)
+         <<" D="<<sizeof(D)<<" E="<<sizeof(E)<<" F="<<sizeof(F)<<"\n";
 
-class SalariedWorker : public Worker {
-    double fixedSalary;
-public:
-    SalariedWorker() : fixedSalary(0) {}
-    SalariedWorker(const std::string& n, int h, double s)
-        : Worker(n, h), fixedSalary(s) {
-        std::cout << "[SalariedWorker] конструктор\n";
-    }
-    SalariedWorker(const SalariedWorker& o) : Worker(o), fixedSalary(o.fixedSalary) {}
-    ~SalariedWorker() { std::cout << "[SalariedWorker] деструктор\n"; }
-    double salary() const override { return fixedSalary; }
-    void print() const override {
-        Worker::print();
-        std::cout << ", Оклад: " << fixedSalary << ", Зарплата: " << salary() << "\n";
-    }
-};
-
-class CommissionWorker : public Worker {
-    double baseAmount, commissionRate;
-public:
-    CommissionWorker() : baseAmount(0), commissionRate(0) {}
-    CommissionWorker(const std::string& n, int h, double b, double r)
-        : Worker(n, h), baseAmount(b), commissionRate(r) {
-        std::cout << "[CommissionWorker] конструктор\n";
-    }
-    CommissionWorker(const CommissionWorker& o) : Worker(o), baseAmount(o.baseAmount), commissionRate(o.commissionRate) {}
-    ~CommissionWorker() { std::cout << "[CommissionWorker] деструктор\n"; }
-    double salary() const override { return baseAmount * commissionRate / 100.0; }
-    void print() const override {
-        Worker::print();
-        std::cout << ", База: " << baseAmount << ", Ставка%: " << commissionRate
-            << ", Зарплата: " << salary() << "\n";
-    }
-};
-// Завдання 3 – SaltWater -> Sea/Gulf -> Bay (virtual base)
-
-class SaltWater {
-protected: double salinity;
-public:
-    SaltWater() : salinity(3.5) { std::cout << "[SaltWater] конструктор\n"; }
-    SaltWater(double s) : salinity(s) { std::cout << "[SaltWater] конструктор\n"; }
-    SaltWater(const SaltWater& o) : salinity(o.salinity) { std::cout << "[SaltWater] конструктор копії\n"; }
-    virtual ~SaltWater() { std::cout << "[SaltWater] деструктор\n"; }
-    virtual void print(std::ostream& out) const { out << "Солоність: " << salinity << "%"; }
-    friend std::ostream& operator<<(std::ostream& out, const SaltWater& sw) { sw.print(out); return out; }
-    friend std::istream& operator>>(std::istream& in, SaltWater& sw) { in >> sw.salinity; return in; }
-};
-
-class Sea : virtual public SaltWater {
-protected: std::string name; double areaKm2;
-public:
-    Sea() : name("Невідоме"), areaKm2(0) { std::cout << "[Sea] конструктор\n"; }
-    Sea(const std::string& n, double a, double s) : SaltWater(s), name(n), areaKm2(a) { std::cout << "[Sea] конструктор\n"; }
-    Sea(const Sea& s) : SaltWater(s), name(s.name), areaKm2(s.areaKm2) { std::cout << "[Sea] конструктор копії\n"; }
-    virtual ~Sea() { std::cout << "[Sea] деструктор\n"; }
-    void print(std::ostream& out) const override {
-        out << "Море: " << name << ", Площа: " << areaKm2 << " км², "; SaltWater::print(out);
-    }
-    friend std::ostream& operator<<(std::ostream& out, const Sea& s) { s.print(out); return out; }
-    friend std::istream& operator>>(std::istream& in, Sea& s) { in >> s.name >> s.areaKm2 >> s.salinity; return in; }
-};
-
-class Gulf : virtual public SaltWater {
-protected: std::string gulfName; double depthM;
-public:
-    Gulf() : gulfName("Невідомий"), depthM(0) { std::cout << "[Gulf] конструктор\n"; }
-    Gulf(const std::string& n, double d, double s) : SaltWater(s), gulfName(n), depthM(d) { std::cout << "[Gulf] конструктор\n"; }
-    Gulf(const Gulf& g) : SaltWater(g), gulfName(g.gulfName), depthM(g.depthM) { std::cout << "[Gulf] конструктор копії\n"; }
-    virtual ~Gulf() { std::cout << "[Gulf] деструктор\n"; }
-    void print(std::ostream& out) const override {
-        out << "Залив: " << gulfName << ", Глибина: " << depthM << " м, "; SaltWater::print(out);
-    }
-    friend std::ostream& operator<<(std::ostream& out, const Gulf& g) { g.print(out); return out; }
-    friend std::istream& operator>>(std::istream& in, Gulf& g) { in >> g.gulfName >> g.depthM >> g.salinity; return in; }
-};
-
-class Bay : public Sea, public Gulf {
-    double lengthM;
-public:
-    Bay() : lengthM(0) { std::cout << "[Bay] конструктор\n"; }
-    Bay(const std::string& sn, double area, const std::string& gn, double depth, double sal, double len)
-        : SaltWater(sal), Sea(sn, area, sal), Gulf(gn, depth, sal), lengthM(len) {
-        std::cout << "[Bay] конструктор\n";
-    }
-    Bay(const Bay& b) : SaltWater(b), Sea(b), Gulf(b), lengthM(b.lengthM) { std::cout << "[Bay] конструктор копії\n"; }
-    virtual ~Bay() { std::cout << "[Bay] деструктор\n"; }
-    void print(std::ostream& out) const override {
-        out << "Бухта: " << name << "/" << gulfName
-            << ", Площа: " << areaKm2 << " км², Глибина: " << depthM
-            << " м, Довжина: " << lengthM << " м, "; SaltWater::print(out);
-    }
-    friend std::ostream& operator<<(std::ostream& out, const Bay& b) { b.print(out); return out; }
-    friend std::istream& operator>>(std::istream& in, Bay& b) {
-        in >> b.name >> b.areaKm2 >> b.gulfName >> b.depthM >> b.salinity >> b.lengthM; return in;
-    }
-};
-
-void task1() {
-    std::cout << "\n=== Завдання 1: Ієрархії множинного успадкування ===\n";
-
-    std::cout << "\n--- Без virtual (A->B, A->C, B+C->D) ---\n";
-    int ab, bb, ac; double cc, dd;
-    std::cout << "Введіть поля для об'єкта D:\n";
-    std::cout << "  a для B (int): "; std::cin >> ab;
-    std::cout << "  b (int): "; std::cin >> bb;
-    std::cout << "  a для C (int): "; std::cin >> ac;
-    std::cout << "  c (double): "; std::cin >> cc;
-    std::cout << "  d (double): "; std::cin >> dd;
-    D obj(ab, bb, ac, cc, dd);
-    std::cout << "Дані об'єкта D: "; obj.show();
-    std::cout << "sizeof(A)=" << sizeof(A) << " sizeof(B)=" << sizeof(B)
-        << " sizeof(C)=" << sizeof(C) << " sizeof(D)=" << sizeof(D) << "\n";
-
-    std::cout << "\n--- З virtual (AV->BV, AV->CV, BV+CV->DV) ---\n";
-    int av, bv, acv; double ccv, dv;
-    std::cout << "Введіть поля для об'єкта DV:\n";
-    std::cout << "  a (int): "; std::cin >> av;
-    std::cout << "  b (int): "; std::cin >> bv;
-    std::cout << "  a для CV (int): "; std::cin >> acv;
-    std::cout << "  c (double): "; std::cin >> ccv;
-    std::cout << "  d (double): "; std::cin >> dv;
-    DV objV(av, bv, acv, ccv, dv);
-    std::cout << "Дані об'єкта DV: "; objV.show();
-    std::cout << "sizeof(AV)=" << sizeof(AV) << " sizeof(BV)=" << sizeof(BV)
-        << " sizeof(CV)=" << sizeof(CV) << " sizeof(DV)=" << sizeof(DV) << "\n";
+    cout << "\n=== Завдання 1: ієрархія З virtual ===\n";
+    int av,dac2,eab2,eb2; double dc2,dd2,ee2,ff2;
+    cout << "a (спільний): "; cin>>av;
+    cout << "DV (a_C c d): "; cin>>dac2>>dc2>>dd2;
+    cout << "EV (a_B b e): "; cin>>eab2>>eb2>>ee2;
+    cout << "f: "; cin>>ff2;
+    FV objV(av,dac2,dc2,dd2,eab2,eb2,ee2,ff2);
+    objV.show();
+    cout << "sizeof: AV="<<sizeof(AV)<<" BV="<<sizeof(BV)<<" CV="<<sizeof(CV)
+         <<" DV="<<sizeof(DV)<<" EV="<<sizeof(EV)<<" FV="<<sizeof(FV)<<"\n";
 }
 
-void task2() {
-    std::cout << "\n=== Завдання 2: Клас «Працівник» та похідні ===\n";
-    std::vector<Worker*> workers;
-    int n;
-    std::cout << "Скільки працівників ввести? "; std::cin >> n;
+struct Worker {
+    string name; int h;
+    Worker(string n,int h):name(n),h(h){}
+    virtual ~Worker(){}
+    virtual double salary()=0;
+    virtual void print(){ cout<<name<<" ("<<h<<"год): "<<salary()<<" грн\n"; }
+};
+struct Hourly    : Worker { double r; Hourly(string n,int h,double r):Worker(n,h),r(r){} double salary(){return h*r;} };
+struct Salaried  : Worker { double s; Salaried(string n,int h,double s):Worker(n,h),s(s){} double salary(){return s;} };
+struct Commission: Worker { double b,r; Commission(string n,int h,double b,double r):Worker(n,h),b(b),r(r){} double salary(){return b*r/100;} };
 
-    for (int i = 0; i < n; i++) {
-        std::cout << "\nПрацівник " << (i + 1) << ". Тип (1-погодинний, 2-штатний, 3-відсотковий): ";
-        int type; std::cin >> type;
-        std::string name;
-        std::cout << "  Ім'я (без пробілів): "; std::cin >> name;
-        int hours; std::cout << "  Кількість годин: "; std::cin >> hours;
-
-        if (type == 1) {
-            double rate; std::cout << "  Ставка за годину: "; std::cin >> rate;
-            workers.push_back(new HourlyWorker(name, hours, rate));
-        }
-        else if (type == 2) {
-            double sal; std::cout << "  Фіксований оклад: "; std::cin >> sal;
-            workers.push_back(new SalariedWorker(name, hours, sal));
-        }
-        else {
-            double base, rate;
-            std::cout << "  Базова сума виробітку: "; std::cin >> base;
-            std::cout << "  Відсоток комісії: "; std::cin >> rate;
-            workers.push_back(new CommissionWorker(name, hours, base, rate));
-        }
+void task2(){
+    cout << "\n=== Завдання 2: Працівники ===\n";
+    int n; cout<<"Кількість: "; cin>>n;
+    vector<Worker*> ws;
+    for(int i=0;i<n;i++){
+        int t; string name; int h;
+        cout<<"["<<i+1<<"] тип(1-погодинний 2-штатний 3-відсотковий) ім'я години: ";
+        cin>>t>>name>>h;
+        if(t==1){ double r; cout<<"    ставка/год: "; cin>>r; ws.push_back(new Hourly(name,h,r)); }
+        else if(t==2){ double s; cout<<"    оклад: "; cin>>s; ws.push_back(new Salaried(name,h,s)); }
+        else{ double b,r; cout<<"    база відсоток: "; cin>>b>>r; ws.push_back(new Commission(name,h,b,r)); }
     }
-
-    std::cout << "\n--- Нарахування зарплати ---\n";
-    for (auto* w : workers) w->print();
-
-    for (auto* w : workers) delete w;
+    cout<<"--- Зарплати ---\n";
+    for(auto* w:ws){ w->print(); delete w; }
 }
 
-void task3() {
-    std::cout << "\n=== Завдання 3: Ієрархія «SaltWater – Sea – Gulf – Bay» ===\n";
 
-    std::cout << "\n-- Об'єкт Sea (море) --\n";
-    std::string seaName; double seaArea, seaSal;
-    std::cout << "  Назва (без пробілів): "; std::cin >> seaName;
-    std::cout << "  Площа (км²): "; std::cin >> seaArea;
-    std::cout << "  Солоність (%): "; std::cin >> seaSal;
-    Sea sea(seaName, seaArea, seaSal);
-    std::cout << sea << "\n";
+struct SaltWater { double sal; SaltWater(double s=3.5):sal(s){}
+    virtual void show(){ cout<<"соль="<<sal<<"%"; } };
+struct Sea  : virtual SaltWater { string name; double area;
+    Sea(string n,double a,double s):SaltWater(s),name(n),area(a){}
+    void show(){ cout<<"Море:"<<name<<" площа="<<area<<"км² "; SaltWater::show(); } };
+struct Gulf : virtual SaltWater { string name; double depth;
+    Gulf(string n,double d,double s):SaltWater(s),name(n),depth(d){}
+    void show(){ cout<<"Залив:"<<name<<" глиб="<<depth<<"м "; SaltWater::show(); } };
+struct Bay  : Sea, Gulf {
+    double len;
+    Bay(string sn,double a,string gn,double d,double s,double l)
+        :SaltWater(s),Sea(sn,a,s),Gulf(gn,d,s),len(l){}
+    void show(){ cout<<"Бухта:"<<Sea::name<<"/"<<Gulf::name
+        <<" площа="<<area<<"км² глиб="<<depth<<"м дов="<<len<<"м "; SaltWater::show(); }
+};
 
-    std::cout << "\n-- Об'єкт Gulf (залив) --\n";
-    std::string gulfName; double gulfDepth, gulfSal;
-    std::cout << "  Назва (без пробілів): "; std::cin >> gulfName;
-    std::cout << "  Глибина (м): "; std::cin >> gulfDepth;
-    std::cout << "  Солоність (%): "; std::cin >> gulfSal;
-    Gulf gulf(gulfName, gulfDepth, gulfSal);
-    std::cout << gulf << "\n";
+void task3(){
+    cout << "\n=== Завдання 3: Море / Залив / Бухта ===\n";
+    string sn; double sa,ss;
+    cout<<"Море (назва площа соль): "; cin>>sn>>sa>>ss;
+    Sea sea(sn,sa,ss); sea.show(); cout<<"\n";
 
-    std::cout << "\n-- Об'єкт Bay (бухта = море + залив) --\n";
-    std::string bSeaName, bGulfName; double bArea, bDepth, bSal, bLen;
-    std::cout << "  Назва моря (без пробілів): "; std::cin >> bSeaName;
-    std::cout << "  Площа моря (км²): "; std::cin >> bArea;
-    std::cout << "  Назва затоки (без пробілів): "; std::cin >> bGulfName;
-    std::cout << "  Глибина (м): "; std::cin >> bDepth;
-    std::cout << "  Солоність (%): "; std::cin >> bSal;
-    std::cout << "  Довжина бухти (м): "; std::cin >> bLen;
-    Bay bay(bSeaName, bArea, bGulfName, bDepth, bSal, bLen);
-    std::cout << bay << "\n";
+    string gn; double gd,gs;
+    cout<<"Залив (назва глибина соль): "; cin>>gn>>gd>>gs;
+    Gulf gulf(gn,gd,gs); gulf.show(); cout<<"\n";
 
-    std::cout << "\n-- Копія бухти (конструктор копіювання) --\n";
-    Bay bayCopy(bay);
-    std::cout << bayCopy << "\n";
-
-    std::cout << "\nsizeof(SaltWater)=" << sizeof(SaltWater)
-        << " sizeof(Sea)=" << sizeof(Sea)
-        << " sizeof(Gulf)=" << sizeof(Gulf)
-        << " sizeof(Bay)=" << sizeof(Bay) << "\n";
+    string bsn,bgn; double ba,bd,bs,bl;
+    cout<<"Бухта (назва_моря площа назва_затоки глибина соль довжина): ";
+    cin>>bsn>>ba>>bgn>>bd>>bs>>bl;
+    Bay bay(bsn,ba,bgn,bd,bs,bl); bay.show(); cout<<"\n";
+    Bay copy(bay); cout<<"Копія: "; copy.show(); cout<<"\n";
+    cout<<"sizeof: SaltWater="<<sizeof(SaltWater)<<" Sea="<<sizeof(Sea)
+        <<" Gulf="<<sizeof(Gulf)<<" Bay="<<sizeof(Bay)<<"\n";
 }
-
-int main() {
-    SetConsoleCP(65001);
-    SetConsoleOutputCP(65001);
-
-    int choice = 0;
+int main(){
+    int choice=0;
     do {
-        std::cout << "\n========== МЕНЮ ==========\n";
-        std::cout << "1. Завдання 1 – ієрархії (virtual / без virtual)\n";
-        std::cout << "2. Завдання 2 – клас Працівник\n";
-        std::cout << "3. Завдання 3 – SaltWater / Sea / Gulf / Bay\n";
-        std::cout << "0. Вихід\n";
-        std::cout << "Ваш вибір: ";
-        std::cin >> choice;
-        switch (choice) {
-        case 1: task1(); break;
-        case 2: task2(); break;
-        case 3: task3(); break;
-        case 0: std::cout << "До побачення!\n"; break;
-        default: std::cout << "Невірний вибір.\n";
+        cout<<"\n========== МЕНЮ ==========\n"
+            <<"1. Завдання 1 – ієрархії (virtual / без virtual)\n"
+            <<"2. Завдання 2 – клас Працівник\n"
+            <<"3. Завдання 3 – Sea / Gulf / Bay\n"
+            <<"0. Вихід\n"
+            <<"Ваш вибір: ";
+        cin>>choice;
+        switch(choice){
+            case 1: task1(); break;
+            case 2: task2(); break;
+            case 3: task3(); break;
+            case 0: cout<<"До побачення!\n"; break;
+            default: cout<<"Невірний вибір.\n";
         }
-    } while (choice != 0);
-    return 0;
+    } while(choice!=0);
 }
